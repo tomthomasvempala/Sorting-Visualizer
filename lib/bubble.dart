@@ -8,6 +8,8 @@ class Bubble extends StatefulWidget {
 
 class _BubbleState extends State<Bubble> {
   int x1 = -1;
+  int numberOfElements = 10;
+  int x2 = -1;
   int time = 50;
   bool enabledShuff = true;
   List<double> listOfValues = [
@@ -23,14 +25,23 @@ class _BubbleState extends State<Bubble> {
     300,
     330,
   ];
+
+  valueGenerator(int x) {
+    listOfValues = [];
+    for (int i = 0; i < x; i++) {
+      listOfValues.add(10 + (350 / x) * i);
+    }
+    setState(() {});
+  }
+
   void initState() {
     listOfValues.shuffle();
     super.initState();
   }
 
   Future<void> bubbleSort() async {
-    for (int i = 0; i < listOfValues.length; i++) {
-      for (x1 = 0; x1 < listOfValues.length - 1 - i; x1++) {
+    for (x2 = 0; x2 < listOfValues.length; x2++) {
+      for (x1 = 0; x1 < listOfValues.length - 1 - x2; x1++) {
         await Future.delayed(Duration(milliseconds: time), () {
           if (listOfValues[x1] > listOfValues[x1 + 1]) {
             double temp = listOfValues[x1];
@@ -67,8 +78,12 @@ class _BubbleState extends State<Bubble> {
                       child: Container(
                         color: (x1 == i || x1 + 1 == i) && x1 != -1
                             ? Colors.red
-                            : Colors.blue,
-                        width: 60,
+                            : i < listOfValues.length - x2
+                                ? Colors.blue
+                                : Colors.green,
+                        width: (MediaQuery.of(context).size.width -
+                                numberOfElements * 16) /
+                            (numberOfElements + 2),
                         height: listOfValues[i],
                       ),
                     )
@@ -98,6 +113,8 @@ class _BubbleState extends State<Bubble> {
                         onPressed: () async {
                           if (enabledShuff) {
                             listOfValues.shuffle();
+                            x1 = -1;
+                            x2 = -1;
                             setState(() {});
                           }
                         },
@@ -115,6 +132,19 @@ class _BubbleState extends State<Bubble> {
                 onChanged: (v) {
                   time = v.toInt();
                   setState(() {});
+                },
+              ),
+              Slider(
+                divisions: 9,
+                min: 5,
+                max: 40,
+                value: numberOfElements.toDouble(),
+                onChanged: (v) {
+                  if (enabledShuff) {
+                    valueGenerator(v.floor());
+                    numberOfElements = v.floor();
+                    setState(() {});
+                  }
                 },
               )
             ],
